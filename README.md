@@ -1,4 +1,4 @@
-# Bachata Vienna
+# Dance_Bachata_Web_Project
 
 Next.js website for Bachata dance classes in Vienna — video library, booking system, and more.
 
@@ -15,5 +15,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - **Next.js 15** (App Router, TypeScript)
 - **Tailwind CSS v4**
+- **Tailwind CSS + Shadcn UI**
 - **Framer Motion**
-- **Supabase** (video storage & database)
+- **Supabase** (PostgreSQL — video storage & database)
