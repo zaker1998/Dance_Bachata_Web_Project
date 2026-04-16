@@ -9,8 +9,8 @@ const contactItems = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@bachatavienna.at",
-    href: "mailto:hello@bachatavienna.at",
+    value: "dusaliev.marat@gmail.com",
+    href: "mailto:dusaliev.marat@gmail.com",
   },
   {
     icon: MapPin,
@@ -21,8 +21,8 @@ const contactItems = [
   {
     icon: Instagram,
     label: "Instagram",
-    value: "@bachatavienna",
-    href: "https://instagram.com/bachatavienna",
+    value: "@_maratikooo_",
+    href: "https://instagram.com/_maratikooo_",
   },
   {
     icon: Youtube,
