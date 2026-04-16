@@ -38,6 +38,14 @@ export function VideoCard({ video }: VideoCardProps) {
           </span>
         </div>
         <p className="text-sm text-muted-foreground">{video.description}</p>
+        <a
+          href={video.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-auto pt-2 text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground"
+        >
+          Original video on YouTube ↗ (not my content)
+        </a>
       </div>
     </article>
   );
