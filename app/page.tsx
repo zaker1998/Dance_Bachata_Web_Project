@@ -2,9 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Globe, Sparkles } from "lucide-react";
+
+type YTPlayer = {
+  destroy: () => void;
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
+  playVideo: () => void;
+};
+
+type YTNamespace = {
+  Player: new (
+    elementId: string,
+    options: Record<string, unknown>
+  ) => YTPlayer;
+};
+
+declare global {
+  interface Window {
+    YT?: YTNamespace;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
 
 const VIDEO_ID = "VCWtj6-q8_E";
 const START_SEC = 168; // 2:48
@@ -38,14 +58,16 @@ const benefits = [
 ];
 
 export default function Home() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     const initPlayer = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      playerRef.current = new (window as any).YT.Player("yt-bg-player", {
+      if (!window.YT?.Player) return;
+      playerRef.current = new window.YT.Player("yt-bg-player", {
         videoId: VIDEO_ID,
         playerVars: {
           autoplay: 1,
@@ -72,12 +94,10 @@ export default function Home() {
       });
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).YT?.Player) {
+    if (window.YT?.Player) {
       initPlayer();
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).onYouTubeIframeAPIReady = initPlayer;
+      window.onYouTubeIframeAPIReady = initPlayer;
       if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
         const tag = document.createElement("script");
         tag.src = "https://www.youtube.com/iframe_api";
@@ -87,8 +107,9 @@ export default function Home() {
 
     return () => {
       playerRef.current?.destroy();
+      playerRef.current = null;
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <>
@@ -125,14 +146,6 @@ export default function Home() {
         </a>
 
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary"
-          >
-          </motion.p>
-
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
