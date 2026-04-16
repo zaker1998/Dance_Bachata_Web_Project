@@ -11,11 +11,9 @@ import {
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Use onboarding@resend.dev until your domain is verified in Resend dashboard
-const FROM =
-  process.env.NODE_ENV === "production"
-    ? "Bachata Vienna <bookings@bachatavienna.at>"
-    : "Bachata Vienna <onboarding@resend.dev>";
+// Using Resend's shared sender until a custom domain is verified in the Resend dashboard.
+// Note: onboarding@resend.dev can only deliver to the email address that owns the Resend account.
+const FROM = "Bachata Vienna <onboarding@resend.dev>";
 const INSTRUCTOR_EMAIL = process.env.INSTRUCTOR_EMAIL ?? "hello@bachatavienna.at";
 
 export async function sendBookingEmails(booking: BookingInsert) {
