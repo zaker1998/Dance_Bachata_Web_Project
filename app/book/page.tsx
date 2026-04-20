@@ -34,10 +34,9 @@ export default function BookPage() {
               <h3 className="font-semibold">Group Class</h3>
             </div>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
-              <li>Up to 16 students per session</li>
               <li>Beginner & intermediate levels</li>
-              <li>Every Wednesday & Saturday</li>
-              <li className="font-medium text-foreground">€15 / class</li>
+              <li>Schedule will be announced soon.</li>
+              <li className="font-medium text-foreground">€15 / class (Student -20%)</li>
             </ul>
           </div>
 
@@ -50,7 +49,7 @@ export default function BookPage() {
               <li>1-on-1 or couple session</li>
               <li>Tailored to your level & goals</li>
               <li>Flexible scheduling</li>
-              <li className="font-medium text-foreground">€50 / hour</li>
+              <li className="font-medium text-foreground">€60 / hour</li>
             </ul>
           </div>
         </aside>

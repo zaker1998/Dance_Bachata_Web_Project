@@ -1,16 +1,19 @@
 import { Mail, MapPin, Instagram, Youtube } from "lucide-react";
+import { ContactForm } from "@/components/contact/contact-form";
 
 export const metadata = {
   title: "Contact — Bachata Vienna",
-  description: "Get in touch about Bachata classes, private lessons, or anything else.",
+  description: "Get in touch about Bachata classes, private lessons, or events in Vienna.",
 };
+
+const CONTACT_EMAIL = "dusaliev.marat@gmail.com";
 
 const contactItems = [
   {
     icon: Mail,
     label: "Email",
-    value: "dusaliev.marat@gmail.com",
-    href: "mailto:dusaliev.marat@gmail.com",
+    value: CONTACT_EMAIL,
+    href: `mailto:${CONTACT_EMAIL}`,
   },
   {
     icon: MapPin,
@@ -71,54 +74,7 @@ export default function ContactPage() {
         <p className="mb-6 text-sm text-muted-foreground">
           I usually respond within 24 hours.
         </p>
-        <form
-          action={`mailto:hello@bachatavienna.at`}
-          method="post"
-          encType="text/plain"
-          className="space-y-4"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label htmlFor="name" className="text-sm font-medium">Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                placeholder="Your name"
-                className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="you@example.com"
-                className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="message" className="text-sm font-medium">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              required
-              rows={5}
-              placeholder="How can I help you?"
-              className="w-full resize-none rounded-lg border border-border bg-white px-4 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <button
-            type="submit"
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 cursor-pointer"
-          >
-            Send Message
-          </button>
-        </form>
+        <ContactForm />
       </div>
     </div>
   );
