@@ -1,0 +1,131 @@
+"use client";
+
+import { useActionState } from "react";
+import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { sendContactMessage, type ContactResult } from "@/app/contact/actions";
+import { cn } from "@/lib/utils";
+
+const initialState: ContactResult = { success: false, message: "" };
+
+const fieldClasses = (hasError: boolean) =>
+  cn(
+    "w-full rounded-lg border bg-white px-4 py-2.5 text-sm",
+    "placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2",
+    hasError
+      ? "border-rose-300 focus:border-rose-400 focus:ring-rose-200"
+      : "border-border focus:border-primary focus:ring-primary/20"
+  );
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="text-xs font-medium text-rose-600">{message}</p>;
+}
+
+export function ContactForm() {
+  const [state, formAction, pending] = useActionState(
+    async (_prev: ContactResult, formData: FormData) => sendContactMessage(formData),
+    initialState
+  );
+
+  const errors = state.fieldErrors ?? {};
+
+  if (state.success) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+        <CheckCircle className="h-10 w-10 text-emerald-600" />
+        <p className="text-lg font-semibold text-emerald-800">{state.message}</p>
+        <p className="text-sm text-emerald-700">
+          I usually respond within 24 hours.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form action={formAction} className="space-y-4" noValidate>
+      {state.message && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {state.message}
+        </div>
+      )}
+
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="contact-website">Website</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
+      <fieldset disabled={pending} className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor="name" className="text-sm font-medium">Name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              autoComplete="name"
+              placeholder="Your name"
+              aria-invalid={!!errors.name}
+              className={fieldClasses(!!errors.name)}
+            />
+            <FieldError message={errors.name} />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-sm font-medium">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              aria-invalid={!!errors.email}
+              className={fieldClasses(!!errors.email)}
+            />
+            <FieldError message={errors.email} />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="message" className="text-sm font-medium">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={5}
+            placeholder="How can I help you?"
+            aria-invalid={!!errors.message}
+            className={cn(
+              fieldClasses(!!errors.message),
+              "resize-none"
+            )}
+          />
+          <FieldError message={errors.message} />
+        </div>
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-70 cursor-pointer"
+        >
+          {pending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending…
+            </>
+          ) : (
+            "Send Message"
+          )}
+        </button>
+      </fieldset>
+    </form>
+  );
+}
