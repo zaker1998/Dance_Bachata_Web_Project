@@ -1,9 +1,19 @@
+import type { Metadata } from "next";
 import { BookingForm } from "@/components/booking/booking-form";
 import { Users, User } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Book a Class — Bachata Vienna",
-  description: "Reserve your spot in a group class or book a private Bachata lesson in Vienna.",
+  description:
+    "Reserve your spot in a group class or book a private Bachata lesson in Vienna.",
+  alternates: { canonical: "/book" },
+  openGraph: {
+    title: "Book a Class — Bachata Vienna",
+    description:
+      "Reserve your spot in a group class or book a private Bachata lesson in Vienna.",
+    url: "/book",
+    type: "website",
+  },
 };
 
 export default function BookPage() {

@@ -1,9 +1,19 @@
+import type { Metadata } from "next";
 import { Mail, MapPin, Instagram, Youtube } from "lucide-react";
 import { ContactForm } from "@/components/contact/contact-form";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Contact — Bachata Vienna",
-  description: "Get in touch about Bachata classes, private lessons, or events in Vienna.",
+  description:
+    "Get in touch about Bachata classes, private lessons, or events in Vienna.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact — Bachata Vienna",
+    description:
+      "Get in touch about Bachata classes, private lessons, or events in Vienna.",
+    url: "/contact",
+    type: "website",
+  },
 };
 
 const CONTACT_EMAIL = "dusaliev.marat@gmail.com";

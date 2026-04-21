@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import { bachataVideos } from "@/lib/data";
 import { VideoCard } from "@/components/videos/video-card";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Video Library — Bachata Vienna",
   description: "Browse our Bachata class recordings across all levels.",
+  alternates: { canonical: "/videos" },
+  openGraph: {
+    title: "Video Library — Bachata Vienna",
+    description: "Browse our Bachata class recordings across all levels.",
+    url: "/videos",
+    type: "website",
+  },
 };
 
 export default function VideosPage() {
