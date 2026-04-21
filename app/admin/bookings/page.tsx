@@ -50,6 +50,7 @@ export default async function AdminBookingsPage() {
               <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">WhatsApp</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Submitted</th>
@@ -61,6 +62,7 @@ export default async function AdminBookingsPage() {
                 <tr key={b.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 font-medium">{b.user_name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{b.user_email}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{b.whatsapp_number}</td>
                   <td className="px-4 py-3 capitalize">{b.class_type}</td>
                   <td className="px-4 py-3">{b.preferred_date}</td>
                   <td className="px-4 py-3 text-muted-foreground">

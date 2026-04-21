@@ -1,7 +1,7 @@
 import type { BookingInsert } from "@/lib/types";
 
 export function notificationEmailHtml(booking: BookingInsert): string {
-  const { user_name, user_email, class_type, preferred_date } = booking;
+  const { user_name, user_email, whatsapp_number, class_type, preferred_date } = booking;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -37,6 +37,10 @@ export function notificationEmailHtml(booking: BookingInsert): string {
                   <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;text-transform:capitalize;">${class_type}</td>
                 </tr>
                 <tr>
+                  <td style="padding:7px 0;font-size:13px;color:#737373;">WhatsApp</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${whatsapp_number}</td>
+                </tr>
+                <tr>
                   <td style="padding:7px 0;font-size:13px;color:#737373;">Preferred date</td>
                   <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${preferred_date}</td>
                 </tr>
@@ -63,6 +67,7 @@ export function notificationEmailText(booking: BookingInsert): string {
 
 Name: ${booking.user_name}
 Email: ${booking.user_email}
+WhatsApp: ${booking.whatsapp_number}
 Class type: ${booking.class_type}
 Preferred date: ${booking.preferred_date}`;
 }

@@ -1,7 +1,7 @@
 import type { BookingInsert } from "@/lib/types";
 
 export function confirmationEmailHtml(booking: BookingInsert): string {
-  const { user_name, class_type, preferred_date } = booking;
+  const { user_name, whatsapp_number, class_type, preferred_date } = booking;
   const formattedDate = new Date(preferred_date).toLocaleDateString("de-AT", {
     weekday: "long",
     day: "numeric",
@@ -56,6 +56,10 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
                         <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${formattedDate}</td>
                       </tr>
                       <tr>
+                        <td style="padding:6px 0;font-size:13px;color:#737373;">WhatsApp</td>
+                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${whatsapp_number}</td>
+                      </tr>
+                      <tr>
                         <td style="padding:6px 0;font-size:13px;color:#737373;">Status</td>
                         <td style="padding:6px 0;">
                           <span style="display:inline-block;background:#fef3c7;color:#92400e;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;">
@@ -106,6 +110,7 @@ export function confirmationEmailText(booking: BookingInsert): string {
 Your Bachata Vienna booking request has been received!
 
 Class type: ${booking.class_type}
+WhatsApp: ${booking.whatsapp_number}
 Preferred date: ${booking.preferred_date}
 Status: Pending confirmation
 

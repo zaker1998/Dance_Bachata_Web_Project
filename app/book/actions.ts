@@ -9,7 +9,12 @@ import type { BookingInsert } from "@/lib/types";
 export interface BookingResult {
   success: boolean;
   message: string;
-  fieldErrors?: Partial<Record<"user_name" | "user_email" | "class_type" | "preferred_date", string>>;
+  fieldErrors?: Partial<
+    Record<
+      "user_name" | "user_email" | "whatsapp_number" | "class_type" | "preferred_date",
+      string
+    >
+  >;
 }
 
 const today = () => {
@@ -30,6 +35,10 @@ const BookingSchema = z.object({
     .toLowerCase()
     .email("Please enter a valid email.")
     .max(120),
+  whatsapp_number: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9()\-\s]{7,20}$/, "Please enter a valid WhatsApp number."),
   class_type: z.enum(["private", "group"], {
     message: "Please pick a class type.",
   }),
@@ -80,6 +89,7 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
   const parsed = BookingSchema.safeParse({
     user_name: formData.get("user_name"),
     user_email: formData.get("user_email"),
+    whatsapp_number: formData.get("whatsapp_number"),
     class_type: formData.get("class_type"),
     preferred_date: formData.get("preferred_date"),
     website: formData.get("website") ?? "",
@@ -92,6 +102,7 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
       if (
         field === "user_name" ||
         field === "user_email" ||
+        field === "whatsapp_number" ||
         field === "class_type" ||
         field === "preferred_date"
       ) {
@@ -113,6 +124,7 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
   const booking: BookingInsert = {
     user_name: parsed.data.user_name,
     user_email: parsed.data.user_email,
+    whatsapp_number: parsed.data.whatsapp_number,
     class_type: parsed.data.class_type,
     preferred_date: parsed.data.preferred_date,
   };

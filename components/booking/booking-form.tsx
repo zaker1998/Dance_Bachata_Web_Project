@@ -125,6 +125,24 @@ export function BookingForm() {
         </div>
 
         <div className="space-y-1.5">
+          <label htmlFor="whatsapp_number" className="text-sm font-medium">
+            WhatsApp Number
+          </label>
+          <input
+            id="whatsapp_number"
+            name="whatsapp_number"
+            type="tel"
+            required
+            autoComplete="tel"
+            placeholder="+43 660 123 4567"
+            aria-invalid={!!errors.whatsapp_number}
+            aria-describedby={errors.whatsapp_number ? "whatsapp_number-error" : undefined}
+            className={fieldClasses(!!errors.whatsapp_number)}
+          />
+          <FieldError message={errors.whatsapp_number} />
+        </div>
+
+        <div className="space-y-1.5">
           <label htmlFor="class_type" className="text-sm font-medium">
             Class Type
           </label>

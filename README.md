@@ -71,9 +71,9 @@ The `bookings` table is expected to have:
 
 - `id uuid default gen_random_uuid() primary key`
 - `created_at timestamptz default now()`
-- `user_name text`, `user_email text`
+- `user_name text`, `user_email text`, `whatsapp_number text`
 - `class_type text check (class_type in ('private','group'))`
 - `preferred_date date`
 - `status text default 'pending' check (status in ('pending','confirmed','cancelled'))`
 
-RLS should allow anon `INSERT` only on `(user_name, user_email, class_type, preferred_date)` and block `SELECT/UPDATE/DELETE`. All reads/writes of `status` and admin queries use the service-role key server-side.
+RLS should allow anon `INSERT` only on `(user_name, user_email, whatsapp_number, class_type, preferred_date)` and block `SELECT/UPDATE/DELETE`. All reads/writes of `status` and admin queries use the service-role key server-side.
