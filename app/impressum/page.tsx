@@ -28,16 +28,16 @@ export default function ImpressumPage() {
           </h2>
           <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-[max-content_1fr]">
             <dt className="font-medium text-muted-foreground">Name</dt>
-            <dd>[YOUR FULL LEGAL NAME — Vor- und Nachname]</dd>
+            <dd>MARAT DUSSALIYEV</dd>
 
             <dt className="font-medium text-muted-foreground">Unternehmen</dt>
-            <dd>Bachata Vienna (Einzelunternehmen — Neue Selbständige)</dd>
+            <dd>Bachata Vienna </dd>
 
             <dt className="font-medium text-muted-foreground">Adresse</dt>
             <dd>
-              [STREET + NUMBER]
+              Eichenstraße 46, 209
               <br />
-              [POSTCODE] Wien
+              1120 Wien
               <br />
               Österreich / Austria
             </dd>
@@ -45,15 +45,15 @@ export default function ImpressumPage() {
             <dt className="font-medium text-muted-foreground">E-Mail</dt>
             <dd>
               <a
-                href="mailto:hello@bachatavienna.com"
+                href="mailto:dusaliev.marat@gmail.com"
                 className="text-primary hover:underline"
               >
-                hello@bachatavienna.com
+                dusaliev.marat@gmail.com
               </a>
             </dd>
 
             <dt className="font-medium text-muted-foreground">Telefon</dt>
-            <dd>[YOUR PHONE NUMBER — required by §5 ECG]</dd>
+            <dd>066565174122</dd>
           </dl>
         </section>
 
@@ -65,7 +65,7 @@ export default function ImpressumPage() {
             <dt className="font-medium text-muted-foreground">
               Berufsbezeichnung
             </dt>
-            <dd>Freiberuflicher Tanzlehrer (Neue Selbständige)</dd>
+            <dd>Freiberuflicher Tanzlehrer</dd>
 
             <dt className="font-medium text-muted-foreground">Tätigkeit</dt>
             <dd>
