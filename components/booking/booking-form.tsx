@@ -32,9 +32,13 @@ const fieldClasses = (hasError: boolean) =>
       : "border-border focus:border-primary focus:ring-primary/20"
   );
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
-  return <p className="text-xs font-medium text-rose-600">{message}</p>;
+  return (
+    <p id={id} className="text-xs font-medium text-rose-600">
+      {message}
+    </p>
+  );
 }
 
 export function BookingForm() {
@@ -103,7 +107,7 @@ export function BookingForm() {
             aria-describedby={errors.user_name ? "user_name-error" : undefined}
             className={fieldClasses(!!errors.user_name)}
           />
-          <FieldError message={errors.user_name} />
+          <FieldError id="user_name-error" message={errors.user_name} />
         </div>
 
         <div className="space-y-1.5">
@@ -121,7 +125,7 @@ export function BookingForm() {
             aria-describedby={errors.user_email ? "user_email-error" : undefined}
             className={fieldClasses(!!errors.user_email)}
           />
-          <FieldError message={errors.user_email} />
+          <FieldError id="user_email-error" message={errors.user_email} />
         </div>
 
         <div className="space-y-1.5">
@@ -139,7 +143,7 @@ export function BookingForm() {
             aria-describedby={errors.whatsapp_number ? "whatsapp_number-error" : undefined}
             className={fieldClasses(!!errors.whatsapp_number)}
           />
-          <FieldError message={errors.whatsapp_number} />
+          <FieldError id="whatsapp_number-error" message={errors.whatsapp_number} />
         </div>
 
         <div className="space-y-1.5">
@@ -152,6 +156,7 @@ export function BookingForm() {
             required
             defaultValue=""
             aria-invalid={!!errors.class_type}
+            aria-describedby={errors.class_type ? "class_type-error" : undefined}
             className={fieldClasses(!!errors.class_type)}
           >
             <option value="" disabled>
@@ -160,7 +165,7 @@ export function BookingForm() {
             <option value="group">Group Class</option>
             <option value="private">Private Lesson</option>
           </select>
-          <FieldError message={errors.class_type} />
+          <FieldError id="class_type-error" message={errors.class_type} />
         </div>
 
         <div className="space-y-1.5">
@@ -174,9 +179,10 @@ export function BookingForm() {
             required
             min={todayIso}
             aria-invalid={!!errors.preferred_date}
+            aria-describedby={errors.preferred_date ? "preferred_date-error" : undefined}
             className={fieldClasses(!!errors.preferred_date)}
           />
-          <FieldError message={errors.preferred_date} />
+          <FieldError id="preferred_date-error" message={errors.preferred_date} />
         </div>
 
         <SubmitButton pending={pending} />

@@ -16,9 +16,13 @@ const fieldClasses = (hasError: boolean) =>
       : "border-border focus:border-primary focus:ring-primary/20"
   );
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
-  return <p className="text-xs font-medium text-rose-600">{message}</p>;
+  return (
+    <p id={id} className="text-xs font-medium text-rose-600">
+      {message}
+    </p>
+  );
 }
 
 export function ContactForm() {
@@ -76,9 +80,10 @@ export function ContactForm() {
               autoComplete="name"
               placeholder="Your name"
               aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "name-error" : undefined}
               className={fieldClasses(!!errors.name)}
             />
-            <FieldError message={errors.name} />
+            <FieldError id="name-error" message={errors.name} />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-sm font-medium">Email</label>
@@ -90,9 +95,10 @@ export function ContactForm() {
               autoComplete="email"
               placeholder="you@example.com"
               aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
               className={fieldClasses(!!errors.email)}
             />
-            <FieldError message={errors.email} />
+            <FieldError id="email-error" message={errors.email} />
           </div>
         </div>
         <div className="space-y-1.5">
@@ -104,12 +110,13 @@ export function ContactForm() {
             rows={5}
             placeholder="How can I help you?"
             aria-invalid={!!errors.message}
+            aria-describedby={errors.message ? "message-error" : undefined}
             className={cn(
               fieldClasses(!!errors.message),
               "resize-none"
             )}
           />
-          <FieldError message={errors.message} />
+          <FieldError id="message-error" message={errors.message} />
         </div>
         <button
           type="submit"
