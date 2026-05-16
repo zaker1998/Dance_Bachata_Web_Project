@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import { z } from "zod";
+import { getServerEnv } from "@/lib/env";
 
 export interface ContactResult {
   success: boolean;
@@ -87,11 +88,11 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
     return { success: true, message: "Thanks — your message has been sent." };
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_EMAIL ?? process.env.INSTRUCTOR_EMAIL;
-
-  if (!apiKey || !to) {
-    console.error("Contact form: RESEND_API_KEY or CONTACT_EMAIL/INSTRUCTOR_EMAIL not set.");
+  let env: ReturnType<typeof getServerEnv>;
+  try {
+    env = getServerEnv();
+  } catch (err) {
+    console.error("Contact form env validation failed:", err);
     return {
       success: false,
       message: "Email is not configured yet. Please try again later.",
@@ -99,7 +100,8 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
   }
 
   const { name, email, message } = parsed.data;
-  const resend = new Resend(apiKey);
+  const resend = new Resend(env.RESEND_API_KEY);
+  const to = env.CONTACT_EMAIL ?? env.INSTRUCTOR_EMAIL;
 
   try {
     await resend.emails.send({
