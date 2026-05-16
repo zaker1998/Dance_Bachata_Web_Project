@@ -36,20 +36,20 @@ export default function DatenschutzPage() {
           </p>
           <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-[max-content_1fr]">
             <dt className="font-medium text-muted-foreground">Name</dt>
-            <dd>[YOUR FULL LEGAL NAME]</dd>
+            <dd>Marat Dussaliyev</dd>
 
             <dt className="font-medium text-muted-foreground">Adresse</dt>
             <dd>
-              [STREET + NUMBER], [POSTCODE] Wien, Österreich
+              Eichenstraße 46, 209 Wien, Österreich
             </dd>
 
             <dt className="font-medium text-muted-foreground">E-Mail</dt>
             <dd>
               <a
-                href="mailto:privacy@bachatavienna.com"
+                href="mailto:dusaliev.marat@gmail.com"
                 className="text-primary hover:underline"
               >
-                privacy@bachatavienna.com
+                dusaliev.marat@gmail.com
               </a>
             </dd>
           </dl>
