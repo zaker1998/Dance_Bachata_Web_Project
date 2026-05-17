@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { sendBookingEmails } from "@/lib/email";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 import type { BookingInsert } from "@/lib/types";
 
 export interface BookingResult {
@@ -11,7 +12,14 @@ export interface BookingResult {
   message: string;
   fieldErrors?: Partial<
     Record<
-      "user_name" | "user_email" | "whatsapp_number" | "class_type" | "preferred_date",
+      | "user_name"
+      | "user_email"
+      | "whatsapp_number"
+      | "class_type"
+      | "preferred_date"
+      | "preferred_time"
+      | "secondary_date"
+      | "secondary_time",
       string
     >
   >;
@@ -23,63 +31,61 @@ const today = () => {
   return d;
 };
 
-const BookingSchema = z.object({
-  user_name: z
+const VALID_TIMES = Array.from({ length: 15 }, (_, i) =>
+  String(i + 8).padStart(2, "0") + ":00"
+) as [string, ...string[]]; // "08:00" … "22:00"
+
+const dateField = (label: string) =>
+  z
     .string()
-    .trim()
-    .min(2, "Please enter your full name.")
-    .max(80, "Name is too long."),
-  user_email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email("Please enter a valid email.")
-    .max(120),
-  whatsapp_number: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9()\-\s]{7,20}$/, "Please enter a valid WhatsApp number."),
-  class_type: z.enum(["private", "group"], {
-    message: "Please pick a class type.",
-  }),
-  preferred_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Please pick a valid date.")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, `Please pick a valid ${label}.`)
     .refine((s) => {
       const d = new Date(s + "T00:00:00");
       return !Number.isNaN(d.getTime()) && d >= today();
-    }, "Date must be today or later."),
-  // Honeypot — must stay empty
-  website: z.string().max(0).optional().or(z.literal("")),
+    }, "Date must be today or later.");
+
+const timeField = z.enum(VALID_TIMES, { message: "Please pick a valid time." });
+
+const BookingSchema = z
+  .object({
+    user_name: z
+      .string()
+      .trim()
+      .min(2, "Please enter your full name.")
+      .max(80, "Name is too long."),
+    user_email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email("Please enter a valid email.")
+      .max(120),
+    whatsapp_number: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9()\-\s]{7,20}$/, "Please enter a valid WhatsApp number."),
+    class_type: z.enum(["private", "group"], {
+      message: "Please pick a class type.",
+    }),
+    preferred_date: dateField("date"),
+    preferred_time: timeField,
+    secondary_date: dateField("date"),
+    secondary_time: timeField,
+    // Honeypot — must stay empty
+    website: z.string().max(0).optional().or(z.literal("")),
+  })
+  .refine(
+    (d) => !(d.preferred_date === d.secondary_date && d.preferred_time === d.secondary_time),
+    { message: "Secondary slot must differ from the primary slot.", path: ["secondary_date"] }
+  );
+
+const bookingRateLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
 });
 
-// Simple in-memory rate limit (per-process). For production, swap for Upstash/Redis.
-const rateLimitStore = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const RATE_LIMIT_MAX = 5;
-
-function rateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-  if (!entry || entry.reset < now) {
-    rateLimitStore.set(key, { count: 1, reset: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT_MAX) return false;
-  entry.count += 1;
-  return true;
-}
-
-async function getClientKey(): Promise<string> {
-  const h = await headers();
-  const fwd = h.get("x-forwarded-for") ?? "";
-  const ip = fwd.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
-  return `booking:${ip}`;
-}
-
 export async function createBooking(formData: FormData): Promise<BookingResult> {
-  const key = await getClientKey();
-  if (!rateLimit(key)) {
+  const ip = await getClientIp();
+  if (!bookingRateLimiter.check(`booking:${ip}`)) {
     return {
       success: false,
       message: "Too many booking attempts. Please try again later.",
@@ -92,19 +98,25 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
     whatsapp_number: formData.get("whatsapp_number"),
     class_type: formData.get("class_type"),
     preferred_date: formData.get("preferred_date"),
+    preferred_time: formData.get("preferred_time"),
+    secondary_date: formData.get("secondary_date"),
+    secondary_time: formData.get("secondary_time"),
     website: formData.get("website") ?? "",
   });
 
   if (!parsed.success) {
     const fieldErrors: BookingResult["fieldErrors"] = {};
     for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
+      const field = issue.path[0] as keyof BookingResult["fieldErrors"];
       if (
         field === "user_name" ||
         field === "user_email" ||
         field === "whatsapp_number" ||
         field === "class_type" ||
-        field === "preferred_date"
+        field === "preferred_date" ||
+        field === "preferred_time" ||
+        field === "secondary_date" ||
+        field === "secondary_time"
       ) {
         fieldErrors[field] ??= issue.message;
       }
@@ -127,8 +139,12 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
     whatsapp_number: parsed.data.whatsapp_number,
     class_type: parsed.data.class_type,
     preferred_date: parsed.data.preferred_date,
+    preferred_time: parsed.data.preferred_time,
+    secondary_date: parsed.data.secondary_date,
+    secondary_time: parsed.data.secondary_time,
   };
 
+  const supabase = createAdminClient();
   const { error } = await supabase.from("bookings").insert(booking);
 
   if (error) {
@@ -136,9 +152,15 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
     return { success: false, message: "Something went wrong. Please try again." };
   }
 
-  sendBookingEmails(booking).catch((err) =>
-    console.error("Email send failed:", err)
-  );
+  // Send emails after the response is sent so the function doesn't get
+  // frozen mid-request on serverless platforms.
+  after(async () => {
+    try {
+      await sendBookingEmails(booking);
+    } catch (err) {
+      console.error("Email send failed:", err);
+    }
+  });
 
   return {
     success: true,

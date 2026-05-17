@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createBooking, type BookingResult } from "@/app/book/actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
 
 const fieldClasses = (hasError: boolean) =>
   cn(
-    "w-full rounded-lg border bg-white px-4 py-2.5 text-sm",
+    "w-full h-10 rounded-lg border bg-white px-4 text-sm",
     "placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2",
     hasError
       ? "border-rose-300 focus:border-rose-400 focus:ring-rose-200"
@@ -41,7 +41,50 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+const TIME_SLOTS = Array.from({ length: 15 }, (_, i) =>
+  String(i + 8).padStart(2, "0") + ":00"
+);
+
+function TimeSelect({
+  id,
+  name,
+  hasError,
+}: {
+  id: string;
+  name: string;
+  hasError: boolean;
+}) {
+  return (
+    <select
+      id={id}
+      name={name}
+      required
+      defaultValue=""
+      aria-invalid={hasError}
+      aria-describedby={hasError ? `${id}-error` : undefined}
+      className={fieldClasses(hasError)}
+    >
+      <option value="" disabled>
+        Select time
+      </option>
+      {TIME_SLOTS.map((t) => (
+        <option key={t} value={t}>
+          {t}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function BookingForm() {
+  // `formKey` lets us remount the form (resetting useActionState + native
+  // form fields) without a full page reload after a successful submission.
+  const [formKey, setFormKey] = useState(0);
+
+  return <BookingFormInner key={formKey} onReset={() => setFormKey((k) => k + 1)} />;
+}
+
+function BookingFormInner({ onReset }: { onReset: () => void }) {
   const [state, formAction, pending] = useActionState(
     async (_prev: BookingResult, formData: FormData) => createBooking(formData),
     initialState
@@ -56,7 +99,7 @@ export function BookingForm() {
         <p className="text-lg font-semibold text-emerald-800">{state.message}</p>
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={onReset}
           className="text-sm font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900"
         >
           Book another class
@@ -168,21 +211,79 @@ export function BookingForm() {
           <FieldError id="class_type-error" message={errors.class_type} />
         </div>
 
-        <div className="space-y-1.5">
-          <label htmlFor="preferred_date" className="text-sm font-medium">
-            Preferred Date
-          </label>
-          <input
-            id="preferred_date"
-            name="preferred_date"
-            type="date"
-            required
-            min={todayIso}
-            aria-invalid={!!errors.preferred_date}
-            aria-describedby={errors.preferred_date ? "preferred_date-error" : undefined}
-            className={fieldClasses(!!errors.preferred_date)}
-          />
-          <FieldError id="preferred_date-error" message={errors.preferred_date} />
+        {/* Primary slot */}
+        <div className="space-y-3 rounded-lg border border-border bg-muted/20 px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Preferred Date &amp; Time
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label htmlFor="preferred_date" className="text-sm font-medium">
+                Date
+              </label>
+              <input
+                id="preferred_date"
+                name="preferred_date"
+                type="date"
+                required
+                min={todayIso}
+                aria-invalid={!!errors.preferred_date}
+                aria-describedby={errors.preferred_date ? "preferred_date-error" : undefined}
+                className={fieldClasses(!!errors.preferred_date)}
+              />
+              <FieldError id="preferred_date-error" message={errors.preferred_date} />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="preferred_time" className="text-sm font-medium">
+                Time
+              </label>
+              <TimeSelect
+                id="preferred_time"
+                name="preferred_time"
+                hasError={!!errors.preferred_time}
+              />
+              <FieldError id="preferred_time-error" message={errors.preferred_time} />
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary slot */}
+        <div className="space-y-3 rounded-lg border border-border bg-muted/20 px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Secondary Preferred Date &amp; Time{" "}
+            <span className="font-normal normal-case tracking-normal text-muted-foreground/70">
+              — if first isn&apos;t available
+            </span>
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label htmlFor="secondary_date" className="text-sm font-medium">
+                Date
+              </label>
+              <input
+                id="secondary_date"
+                name="secondary_date"
+                type="date"
+                required
+                min={todayIso}
+                aria-invalid={!!errors.secondary_date}
+                aria-describedby={errors.secondary_date ? "secondary_date-error" : undefined}
+                className={fieldClasses(!!errors.secondary_date)}
+              />
+              <FieldError id="secondary_date-error" message={errors.secondary_date} />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="secondary_time" className="text-sm font-medium">
+                Time
+              </label>
+              <TimeSelect
+                id="secondary_time"
+                name="secondary_time"
+                hasError={!!errors.secondary_time}
+              />
+              <FieldError id="secondary_time-error" message={errors.secondary_time} />
+            </div>
+          </div>
         </div>
 
         <SubmitButton pending={pending} />

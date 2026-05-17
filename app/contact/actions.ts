@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { Resend } from "resend";
 import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { escapeHtml } from "@/lib/utils";
 
 export interface ContactResult {
   success: boolean;
@@ -22,39 +23,15 @@ const ContactSchema = z.object({
   website: z.string().max(0).optional().or(z.literal("")),
 });
 
-const rateLimitStore = new Map<string, { count: number; reset: number }>();
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX = 5;
-
-function rateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
-  if (!entry || entry.reset < now) {
-    rateLimitStore.set(key, { count: 1, reset: now + WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= MAX) return false;
-  entry.count += 1;
-  return true;
-}
-
-function escapeHtml(str: string) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+const contactRateLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+});
 
 export async function sendContactMessage(formData: FormData): Promise<ContactResult> {
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown";
+  const ip = await getClientIp();
 
-  if (!rateLimit(`contact:${ip}`)) {
+  if (!contactRateLimiter.check(`contact:${ip}`)) {
     return {
       success: false,
       message: "Too many messages. Please try again later.",
@@ -105,7 +82,7 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
 
   try {
     await resend.emails.send({
-      from: "Bachata Vienna <onboarding@resend.dev>",
+      from: env.RESEND_FROM_EMAIL,
       to,
       replyTo: email,
       subject: `New contact message from ${name}`,

@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Mail, MapPin, Instagram, Youtube } from "lucide-react";
 import { ContactForm } from "@/components/contact/contact-form";
+import {
+  CITY,
+  COUNTRY,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_URL,
+  PUBLIC_CONTACT_EMAIL,
+  SITE_NAME,
+  YOUTUBE_URL,
+} from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Contact — Bachata Vienna",
@@ -16,32 +25,30 @@ export const metadata: Metadata = {
   },
 };
 
-const CONTACT_EMAIL = "dusaliev.marat@gmail.com";
-
 const contactItems = [
   {
     icon: Mail,
     label: "Email",
-    value: CONTACT_EMAIL,
-    href: `mailto:${CONTACT_EMAIL}`,
+    value: PUBLIC_CONTACT_EMAIL,
+    href: `mailto:${PUBLIC_CONTACT_EMAIL}`,
   },
   {
     icon: MapPin,
     label: "Location",
-    value: "Vienna, Austria",
-    href: "https://maps.google.com/?q=Vienna,Austria",
+    value: `${CITY}, ${COUNTRY}`,
+    href: `https://maps.google.com/?q=${CITY},${COUNTRY}`,
   },
   {
     icon: Instagram,
     label: "Instagram",
-    value: "@_maratikooo_",
-    href: "https://instagram.com/_maratikooo_",
+    value: `@${INSTAGRAM_HANDLE}`,
+    href: INSTAGRAM_URL,
   },
   {
     icon: Youtube,
     label: "YouTube",
-    value: "Bachata Vienna",
-    href: "https://youtube.com/@bachatavienna",
+    value: SITE_NAME,
+    href: YOUTUBE_URL,
   },
 ];
 

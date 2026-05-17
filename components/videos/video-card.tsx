@@ -16,10 +16,11 @@ export function VideoCard({ video }: VideoCardProps) {
     <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-video w-full bg-muted">
         <iframe
-          src={`https://www.youtube.com/embed/${video.youtubeId}`}
+          src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0&modestbranding=1`}
           title={video.title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin"
           className="absolute inset-0 h-full w-full"
           loading="lazy"
         />
