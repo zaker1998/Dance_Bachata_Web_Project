@@ -1,34 +1,12 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { FadeUp } from "@/components/ui/fade-up";
+import { HeroVideo } from "@/components/home/hero-video";
 import { Heart, Users, Globe, Sparkles } from "lucide-react";
-
-type YTPlayer = {
-  destroy: () => void;
-  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
-  playVideo: () => void;
-};
-
-type YTNamespace = {
-  Player: new (
-    elementId: string,
-    options: Record<string, unknown>
-  ) => YTPlayer;
-};
-
-declare global {
-  interface Window {
-    YT?: YTNamespace;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
 
 const VIDEO_ID = "VCWtj6-q8_E";
 const START_SEC = 168; // 2:48
-const END_SEC = 307;   // 5:07
+const END_SEC = 307; // 5:07
 
 const benefits = [
   {
@@ -58,84 +36,14 @@ const benefits = [
 ];
 
 export default function Home() {
-  const playerRef = useRef<YTPlayer | null>(null);
-  const [videoPlaying, setVideoPlaying] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const initPlayer = () => {
-      if (!window.YT?.Player) return;
-      playerRef.current = new window.YT.Player("yt-bg-player", {
-        videoId: VIDEO_ID,
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          showinfo: 0,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          start: START_SEC,
-          end: END_SEC,
-          iv_load_policy: 3,
-          disablekb: 1,
-        },
-        events: {
-          onStateChange: (event: { data: number }) => {
-            if (event.data === 1) setVideoPlaying(true);
-            if (event.data === 0) {
-              playerRef.current?.seekTo(START_SEC, true);
-              playerRef.current?.playVideo();
-            }
-          },
-        },
-      });
-    };
-
-    if (window.YT?.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-        const tag = document.createElement("script");
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(tag);
-      }
-    }
-
-    return () => {
-      playerRef.current?.destroy();
-      playerRef.current = null;
-    };
-  }, [prefersReducedMotion]);
-
   return (
     <>
       {/* ── Hero ── */}
       <section className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden">
-        {/* Blurred thumbnail — fades out once the video starts playing */}
-        <div
-          className={`pointer-events-none absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-            videoPlaying ? "opacity-0" : "opacity-100"
-          }`}
-          style={{
-            backgroundImage: `url(https://img.youtube.com/vi/${VIDEO_ID}/maxresdefault.jpg)`,
-            filter: "blur(12px)",
-            transform: "scale(1.08)",
-          }}
-        />
+        <HeroVideo videoId={VIDEO_ID} startSec={START_SEC} endSec={END_SEC} />
 
-        {/* YouTube iframe (IFrame API replaces the div) */}
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div id="yt-bg-player" />
-        </div>
-
-        {/* Dark overlay */}
         <div className="pointer-events-none absolute inset-0 bg-black/55" />
 
-        {/* Attribution */}
         <a
           href={`https://www.youtube.com/watch?v=${VIDEO_ID}`}
           target="_blank"
@@ -146,31 +54,27 @@ export default function Home() {
         </a>
 
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          <FadeUp
+            as="h1"
+            delay={0.1}
             className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl"
           >
             Master Bachata
             <br />
             <span className="text-primary">in Vienna</span>
-          </motion.h1>
+          </FadeUp>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <FadeUp
+            as="p"
+            delay={0.2}
             className="mx-auto mt-6 max-w-xl text-lg text-white/80"
           >
             From first steps to advanced combinations — join our group classes,
             book a private session, or learn at your own pace with video library.
-          </motion.p>
+          </FadeUp>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+          <FadeUp
+            delay={0.3}
             className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
           >
             <Button asChild size="lg" className="shadow-lg">
@@ -184,40 +88,32 @@ export default function Home() {
             >
               <Link href="/videos">Browse Videos</Link>
             </Button>
-          </motion.div>
+          </FadeUp>
         </div>
       </section>
 
       {/* ── Bachata Story ── */}
       <section className="bg-background py-24">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+          <FadeUp
+            as="p"
             className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary"
           >
             The Dance
-          </motion.p>
+          </FadeUp>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          <FadeUp
+            as="h2"
+            delay={0.1}
             className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           >
             Born in the Dominican Republic.
             <br />
             <span className="text-primary">Loved by the world.</span>
-          </motion.h2>
+          </FadeUp>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <FadeUp
+            delay={0.2}
             className="mt-8 space-y-5 text-left text-lg leading-relaxed text-muted-foreground"
           >
             <p>
@@ -238,18 +134,16 @@ export default function Home() {
               told through movement, built on trust, carried by music that makes
               you feel everything at once.
             </p>
-          </motion.div>
+          </FadeUp>
 
-          <motion.blockquote
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+          <FadeUp
+            as="blockquote"
+            delay={0.3}
             className="mt-12 border-l-4 border-primary pl-6 text-left italic text-muted-foreground"
           >
             &ldquo;A music that was once forbidden is now the language that
             connects millions of people who never shared a single word.&rdquo;
-          </motion.blockquote>
+          </FadeUp>
         </div>
       </section>
 
@@ -267,12 +161,9 @@ export default function Home() {
 
           <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((b, i) => (
-              <motion.div
+              <FadeUp
                 key={b.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                delay={i * 0.1}
                 className="flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
@@ -282,7 +173,7 @@ export default function Home() {
                 <p className="text-sm leading-relaxed text-white/60">
                   {b.description}
                 </p>
-              </motion.div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -291,31 +182,23 @@ export default function Home() {
       {/* ── "Just Try It" CTA ── */}
       <section className="bg-background py-24">
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+          <FadeUp
+            as="p"
             className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary"
           >
             Just Try It
-          </motion.p>
+          </FadeUp>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          <FadeUp
+            as="h2"
+            delay={0.1}
             className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           >
             One class. That&apos;s all it takes.
-          </motion.h2>
+          </FadeUp>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <FadeUp
+            delay={0.2}
             className="mt-8 space-y-5 text-lg leading-relaxed text-muted-foreground"
           >
             <p>
@@ -337,19 +220,13 @@ export default function Home() {
             <p className="text-xl font-semibold text-foreground">
               Try it. We 100% guarantee you will not regret it.
             </p>
-          </motion.div>
+          </FadeUp>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-10"
-          >
+          <FadeUp delay={0.3} className="mt-10">
             <Button asChild size="lg" className="shadow-lg">
               <Link href="/book">Book Your First Class</Link>
             </Button>
-          </motion.div>
+          </FadeUp>
         </div>
       </section>
     </>

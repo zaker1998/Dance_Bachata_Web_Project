@@ -19,12 +19,6 @@ async function getBookings(): Promise<BookingRow[]> {
   return data ?? [];
 }
 
-const statusDot: Record<string, string> = {
-  pending: "bg-amber-400",
-  confirmed: "bg-emerald-500",
-  cancelled: "bg-rose-400",
-};
-
 export default async function AdminBookingsPage() {
   const bookings = await getBookings();
 
@@ -52,7 +46,8 @@ export default async function AdminBookingsPage() {
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">WhatsApp</th>
                 <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">1st slot</th>
+                <th className="px-4 py-3">2nd slot</th>
                 <th className="px-4 py-3">Submitted</th>
                 <th className="px-4 py-3">Status</th>
               </tr>
@@ -64,7 +59,24 @@ export default async function AdminBookingsPage() {
                   <td className="px-4 py-3 text-muted-foreground">{b.user_email}</td>
                   <td className="px-4 py-3 text-muted-foreground">{b.whatsapp_number}</td>
                   <td className="px-4 py-3 capitalize">{b.class_type}</td>
-                  <td className="px-4 py-3">{b.preferred_date}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {b.preferred_date}
+                    {b.preferred_time && (
+                      <span className="ml-1 text-muted-foreground">@ {b.preferred_time}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {b.secondary_date ? (
+                      <>
+                        {b.secondary_date}
+                        {b.secondary_time && (
+                          <span className="ml-1 text-muted-foreground">@ {b.secondary_time}</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground/50">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {new Date(b.created_at).toLocaleDateString("de-AT", {
                       day: "2-digit",
@@ -73,12 +85,7 @@ export default async function AdminBookingsPage() {
                     })}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`h-2 w-2 rounded-full ${statusDot[b.status] ?? "bg-muted-foreground"}`}
-                      />
-                      <StatusSelect id={b.id} current={b.status} />
-                    </div>
+                    <StatusSelect id={b.id} current={b.status} />
                   </td>
                 </tr>
               ))}

@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import {
+  CITY,
+  COUNTRY,
+  INSTAGRAM_URL,
+  PUBLIC_CONTACT_EMAIL,
+  SITE_NAME,
+  YOUTUBE_URL,
+} from "@/lib/constants";
 import "./globals.css";
 
 const siteUrl =
@@ -53,21 +61,17 @@ export const metadata: Metadata = {
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Bachata Vienna",
-  description:
-    "Bachata dance classes and private lessons in Vienna, Austria.",
+  name: SITE_NAME,
+  description: `Bachata dance classes and private lessons in ${CITY}, ${COUNTRY}.`,
   url: siteUrl,
-  email: "hello@bachatavienna.at",
+  email: PUBLIC_CONTACT_EMAIL,
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Vienna",
+    addressLocality: CITY,
     addressCountry: "AT",
   },
-  areaServed: "Vienna, Austria",
-  sameAs: [
-    "https://instagram.com/bachatavienna",
-    "https://youtube.com/@bachatavienna",
-  ],
+  areaServed: `${CITY}, ${COUNTRY}`,
+  sameAs: [INSTAGRAM_URL, YOUTUBE_URL],
 };
 
 export default function RootLayout({
