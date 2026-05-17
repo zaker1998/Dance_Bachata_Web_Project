@@ -1,13 +1,33 @@
 import type { BookingInsert } from "@/lib/types";
+import { PUBLIC_CONTACT_EMAIL } from "@/lib/constants";
+import { escapeHtml } from "@/lib/utils";
 
-export function confirmationEmailHtml(booking: BookingInsert): string {
-  const { user_name, whatsapp_number, class_type, preferred_date } = booking;
-  const formattedDate = new Date(preferred_date).toLocaleDateString("de-AT", {
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+function formatDate(iso: string): string {
+  return new Date(iso + "T00:00:00").toLocaleDateString("de-AT", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+}
+
+export function confirmationEmailHtml(booking: BookingInsert): string {
+  const {
+    user_name,
+    whatsapp_number,
+    class_type,
+    preferred_date,
+    preferred_time,
+    secondary_date,
+    secondary_time,
+  } = booking;
+  const safeName = escapeHtml(user_name);
+  const safeWhatsApp = escapeHtml(whatsapp_number);
+  const safeClassType = escapeHtml(class_type);
+  const safeSlot1 = escapeHtml(`${formatDate(preferred_date)}, ${preferred_time}`);
+  const safeSlot2 = escapeHtml(`${formatDate(secondary_date)}, ${secondary_time}`);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -38,7 +58,7 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
                 You&apos;re booked! 🎉
               </h1>
               <p style="margin:0 0 28px;font-size:15px;color:#737373;">
-                Hi ${user_name}, your booking request has been received. We&apos;ll confirm your spot shortly.
+                Hi ${safeName}, your booking request has been received. We&apos;ll confirm your spot shortly.
               </p>
 
               <!-- Booking details box -->
@@ -49,15 +69,19 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="padding:6px 0;font-size:13px;color:#737373;width:40%;">Class type</td>
-                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;text-transform:capitalize;">${class_type}</td>
+                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;text-transform:capitalize;">${safeClassType}</td>
                       </tr>
                       <tr>
-                        <td style="padding:6px 0;font-size:13px;color:#737373;">Preferred date</td>
-                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${formattedDate}</td>
+                        <td style="padding:6px 0;font-size:13px;color:#737373;">1st choice</td>
+                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeSlot1}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0;font-size:13px;color:#737373;">2nd choice</td>
+                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeSlot2}</td>
                       </tr>
                       <tr>
                         <td style="padding:6px 0;font-size:13px;color:#737373;">WhatsApp</td>
-                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${whatsapp_number}</td>
+                        <td style="padding:6px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeWhatsApp}</td>
                       </tr>
                       <tr>
                         <td style="padding:6px 0;font-size:13px;color:#737373;">Status</td>
@@ -74,13 +98,13 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
 
               <p style="margin:0 0 28px;font-size:14px;color:#737373;line-height:1.6;">
                 Questions? Reply to this email or reach us at
-                <a href="mailto:hello@bachatavienna.at" style="color:#c2185b;text-decoration:none;">
-                  hello@bachatavienna.at
+                <a href="mailto:${PUBLIC_CONTACT_EMAIL}" style="color:#c2185b;text-decoration:none;">
+                  ${PUBLIC_CONTACT_EMAIL}
                 </a>
               </p>
 
               <!-- CTA -->
-              <a href="https://bachatavienna.at/videos"
+              <a href="${siteUrl}/videos"
                 style="display:inline-block;background:#c2185b;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none;">
                 Browse Class Videos
               </a>
@@ -111,11 +135,12 @@ Your Bachata Vienna booking request has been received!
 
 Class type: ${booking.class_type}
 WhatsApp: ${booking.whatsapp_number}
-Preferred date: ${booking.preferred_date}
+1st choice: ${booking.preferred_date} @ ${booking.preferred_time}
+2nd choice: ${booking.secondary_date} @ ${booking.secondary_time}
 Status: Pending confirmation
 
 We'll be in touch shortly to confirm your spot.
 
 — Bachata Vienna
-hello@bachatavienna.at`;
+${PUBLIC_CONTACT_EMAIL}`;
 }

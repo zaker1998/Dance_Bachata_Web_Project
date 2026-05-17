@@ -1,7 +1,25 @@
 import type { BookingInsert } from "@/lib/types";
+import { escapeHtml } from "@/lib/utils";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export function notificationEmailHtml(booking: BookingInsert): string {
-  const { user_name, user_email, whatsapp_number, class_type, preferred_date } = booking;
+  const {
+    user_name,
+    user_email,
+    whatsapp_number,
+    class_type,
+    preferred_date,
+    preferred_time,
+    secondary_date,
+    secondary_time,
+  } = booking;
+  const safeName = escapeHtml(user_name);
+  const safeEmail = escapeHtml(user_email);
+  const safeWhatsApp = escapeHtml(whatsapp_number);
+  const safeClassType = escapeHtml(class_type);
+  const safeSlot1 = escapeHtml(`${preferred_date} @ ${preferred_time}`);
+  const safeSlot2 = escapeHtml(`${secondary_date} @ ${secondary_time}`);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -24,30 +42,34 @@ export function notificationEmailHtml(booking: BookingInsert): string {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding:7px 0;font-size:13px;color:#737373;width:40%;">Name</td>
-                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${user_name}</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding:7px 0;font-size:13px;color:#737373;">Email</td>
                   <td style="padding:7px 0;font-size:13px;">
-                    <a href="mailto:${user_email}" style="color:#c2185b;text-decoration:none;">${user_email}</a>
+                    <a href="mailto:${encodeURIComponent(user_email)}" style="color:#c2185b;text-decoration:none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:7px 0;font-size:13px;color:#737373;">Class type</td>
-                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;text-transform:capitalize;">${class_type}</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;text-transform:capitalize;">${safeClassType}</td>
                 </tr>
                 <tr>
                   <td style="padding:7px 0;font-size:13px;color:#737373;">WhatsApp</td>
-                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${whatsapp_number}</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeWhatsApp}</td>
                 </tr>
                 <tr>
-                  <td style="padding:7px 0;font-size:13px;color:#737373;">Preferred date</td>
-                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${preferred_date}</td>
+                  <td style="padding:7px 0;font-size:13px;color:#737373;">1st choice</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeSlot1}</td>
+                </tr>
+                <tr>
+                  <td style="padding:7px 0;font-size:13px;color:#737373;">2nd choice</td>
+                  <td style="padding:7px 0;font-size:13px;font-weight:600;color:#1a1a1a;">${safeSlot2}</td>
                 </tr>
               </table>
 
               <div style="margin-top:24px;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/admin/bookings"
+                <a href="${siteUrl}/admin/bookings"
                   style="display:inline-block;background:#1a1a1a;color:#ffffff;font-size:13px;font-weight:600;padding:10px 22px;border-radius:8px;text-decoration:none;">
                   View in Admin Dashboard →
                 </a>
@@ -69,5 +91,6 @@ Name: ${booking.user_name}
 Email: ${booking.user_email}
 WhatsApp: ${booking.whatsapp_number}
 Class type: ${booking.class_type}
-Preferred date: ${booking.preferred_date}`;
+1st choice: ${booking.preferred_date} @ ${booking.preferred_time}
+2nd choice: ${booking.secondary_date} @ ${booking.secondary_time}`;
 }

@@ -10,24 +10,21 @@ import {
 } from "@/lib/emails/notification";
 import { getServerEnv } from "@/lib/env";
 
-// Using Resend's shared sender until a custom domain is verified in the Resend dashboard.
-// Note: onboarding@resend.dev can only deliver to the email address that owns the Resend account.
-const FROM = "Bachata Vienna <onboarding@resend.dev>";
-
 export async function sendBookingEmails(booking: BookingInsert) {
   const env = getServerEnv();
   const resend = new Resend(env.RESEND_API_KEY);
+  const from = env.RESEND_FROM_EMAIL;
 
   const [confirmation, notification] = await Promise.allSettled([
     resend.emails.send({
-      from: FROM,
+      from,
       to: booking.user_email,
       subject: "Your Bachata Vienna booking is received 🎉",
       html: confirmationEmailHtml(booking),
       text: confirmationEmailText(booking),
     }),
     resend.emails.send({
-      from: FROM,
+      from,
       to: env.INSTRUCTOR_EMAIL,
       subject: `New booking: ${booking.user_name} — ${booking.class_type}`,
       html: notificationEmailHtml(booking),
