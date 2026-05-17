@@ -27,6 +27,7 @@ ADMIN_PASSWORD=<min 8 chars>
 
 # Resend
 RESEND_API_KEY=...
+RESEND_FROM_EMAIL="Bachata Vienna <noreply@bachatavienna.at>" # verified Resend domain in prod
 INSTRUCTOR_EMAIL=you@example.com
 CONTACT_EMAIL=you@example.com   # optional — falls back to INSTRUCTOR_EMAIL
 
@@ -35,6 +36,8 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 Env vars are validated with Zod on boot (`lib/env.ts`), so missing/invalid values fail fast with a clear error.
+
+> **Production email**: until you verify a custom domain in Resend, leave `RESEND_FROM_EMAIL` at its default. Resend's shared `onboarding@resend.dev` sender can only deliver to the address that owns the Resend account, so booking confirmations to guests will silently fail. Verify your domain and set `RESEND_FROM_EMAIL` to e.g. `Bachata Vienna <noreply@yourdomain>` before launch.
 
 ## Tech Stack
 
@@ -59,15 +62,23 @@ app/
 components/
 lib/
   env.ts             # zod-validated env access
-  supabase.ts        # anon client (for inserts)
-  supabase-admin.ts  # service-role client (admin only, server-only)
+  supabase-admin.ts  # service-role client (server-only)
   email.ts           # Resend helpers for booking emails
+  rate-limit.ts      # in-memory per-process rate limiter
+  constants.ts       # public brand info (contact email, socials, …)
 middleware.ts        # timing-safe Basic Auth for /admin/*
 ```
 
-## Supabase Schema
+## Database
 
-The `bookings` table is expected to have:
+Migrations live in `supabase/migrations/`. Apply them with the Supabase CLI:
+
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+The `bookings` table has:
 
 - `id uuid default gen_random_uuid() primary key`
 - `created_at timestamptz default now()`
@@ -76,4 +87,4 @@ The `bookings` table is expected to have:
 - `preferred_date date`
 - `status text default 'pending' check (status in ('pending','confirmed','cancelled'))`
 
-RLS should allow anon `INSERT` only on `(user_name, user_email, whatsapp_number, class_type, preferred_date)` and block `SELECT/UPDATE/DELETE`. All reads/writes of `status` and admin queries use the service-role key server-side.
+RLS is enabled and **all anon access is revoked** (see `20260516…_lock_down_anon_inserts.sql`). All booking inserts, reads, and status updates go through Next.js Server Actions using the service-role key — there is no direct browser-to-Supabase path.
