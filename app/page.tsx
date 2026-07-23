@@ -5,7 +5,7 @@ import { HeroVideo } from "@/components/home/hero-video";
 import { Heart, Users, Globe, Sparkles } from "lucide-react";
 
 const VIDEO_ID = "XiXC-6eum5E";
-const START_SEC = 81; // 1:21
+const START_SEC = 84; // 1:24
 const END_SEC = 176; // 2:56
 
 const benefits = [
@@ -44,15 +44,7 @@ export default function Home() {
 
         <div className="pointer-events-none absolute inset-0 bg-black/55" />
 
-        <a
-          href={`https://www.youtube.com/watch?v=${VIDEO_ID}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-3 right-4 z-10 text-xs text-white/40 transition-colors hover:text-white/70"
-        >
-          Video source (not me in the video) ↗
-        </a>
-
+        
         <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
           <FadeUp
             as="h1"
