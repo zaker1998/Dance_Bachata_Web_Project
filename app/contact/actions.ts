@@ -81,7 +81,7 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
   const to = env.CONTACT_EMAIL ?? env.INSTRUCTOR_EMAIL;
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: env.RESEND_FROM_EMAIL,
       to,
       replyTo: email,
@@ -90,6 +90,13 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
       html: `<p><strong>From:</strong> ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p>
 <p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
     });
+    if (error) {
+      console.error("Contact email send failed:", error);
+      return {
+        success: false,
+        message: "Couldn't send your message right now. Please try again shortly.",
+      };
+    }
   } catch (err) {
     console.error("Contact email send failed:", err);
     return {

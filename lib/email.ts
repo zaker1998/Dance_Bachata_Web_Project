@@ -32,10 +32,17 @@ export async function sendBookingEmails(booking: BookingInsert) {
     }),
   ]);
 
+  // Resend resolves with `{ data, error }` instead of throwing on API errors —
+  // check both rejection and the error payload so failures aren't silent.
   if (confirmation.status === "rejected") {
     console.error("Failed to send confirmation email:", confirmation.reason);
+  } else if (confirmation.value.error) {
+    console.error("Failed to send confirmation email:", confirmation.value.error);
   }
+
   if (notification.status === "rejected") {
     console.error("Failed to send notification email:", notification.reason);
+  } else if (notification.value.error) {
+    console.error("Failed to send notification email:", notification.value.error);
   }
 }
