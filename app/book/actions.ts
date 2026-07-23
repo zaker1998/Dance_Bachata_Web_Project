@@ -105,9 +105,9 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
   });
 
   if (!parsed.success) {
-    const fieldErrors: BookingResult["fieldErrors"] = {};
+    const fieldErrors: NonNullable<BookingResult["fieldErrors"]> = {};
     for (const issue of parsed.error.issues) {
-      const field = issue.path[0] as keyof BookingResult["fieldErrors"];
+      const field = issue.path[0];
       if (
         field === "user_name" ||
         field === "user_email" ||
