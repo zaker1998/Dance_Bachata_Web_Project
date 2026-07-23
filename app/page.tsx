@@ -4,9 +4,9 @@ import { FadeUp } from "@/components/ui/fade-up";
 import { HeroVideo } from "@/components/home/hero-video";
 import { Heart, Users, Globe, Sparkles } from "lucide-react";
 
-const VIDEO_ID = "VCWtj6-q8_E";
-const START_SEC = 168; // 2:48
-const END_SEC = 307; // 5:07
+const VIDEO_ID = "XiXC-6eum5E";
+const START_SEC = 81; // 1:21
+const END_SEC = 176; // 2:56
 
 const benefits = [
   {

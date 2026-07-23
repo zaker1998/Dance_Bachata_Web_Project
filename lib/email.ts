@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { BookingInsert } from "@/lib/types";
+import type { BookingInsert, BookingRow } from "@/lib/types";
 import {
   confirmationEmailHtml,
   confirmationEmailText,
@@ -8,7 +8,22 @@ import {
   notificationEmailHtml,
   notificationEmailText,
 } from "@/lib/emails/notification";
+import {
+  statusConfirmedEmailHtml,
+  statusConfirmedEmailText,
+} from "@/lib/emails/status-confirmed";
 import { getServerEnv } from "@/lib/env";
+
+function logResendResult(
+  label: string,
+  result: PromiseSettledResult<{ error: unknown }>
+) {
+  if (result.status === "rejected") {
+    console.error(`Failed to send ${label}:`, result.reason);
+  } else if (result.value.error) {
+    console.error(`Failed to send ${label}:`, result.value.error);
+  }
+}
 
 export async function sendBookingEmails(booking: BookingInsert) {
   const env = getServerEnv();
@@ -34,15 +49,23 @@ export async function sendBookingEmails(booking: BookingInsert) {
 
   // Resend resolves with `{ data, error }` instead of throwing on API errors —
   // check both rejection and the error payload so failures aren't silent.
-  if (confirmation.status === "rejected") {
-    console.error("Failed to send confirmation email:", confirmation.reason);
-  } else if (confirmation.value.error) {
-    console.error("Failed to send confirmation email:", confirmation.value.error);
-  }
+  logResendResult("confirmation email", confirmation);
+  logResendResult("notification email", notification);
+}
 
-  if (notification.status === "rejected") {
-    console.error("Failed to send notification email:", notification.reason);
-  } else if (notification.value.error) {
-    console.error("Failed to send notification email:", notification.value.error);
+export async function sendBookingConfirmedEmail(booking: BookingRow) {
+  const env = getServerEnv();
+  const resend = new Resend(env.RESEND_API_KEY);
+
+  const result = await resend.emails.send({
+    from: env.RESEND_FROM_EMAIL,
+    to: booking.user_email,
+    subject: "Your Bachata Vienna booking is confirmed 🎉",
+    html: statusConfirmedEmailHtml(booking),
+    text: statusConfirmedEmailText(booking),
+  });
+
+  if (result.error) {
+    console.error("Failed to send status-confirmed email:", result.error);
   }
 }
