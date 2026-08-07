@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PUBLIC_CONTACT_EMAIL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Datenschutzerklärung — Bachata Vienna",
+  title: "Datenschutzerklärung",
   description:
     "Informationen zur Verarbeitung personenbezogener Daten gemäß DSGVO und österreichischem Datenschutzgesetz.",
   alternates: { canonical: "/datenschutz" },
@@ -98,8 +99,8 @@ export default function DatenschutzPage() {
               </h3>
               <p>
                 Zur Buchung von Tanzkursen erheben wir: Name, E-Mail-Adresse,
-                Telefonnummer (optional), gewünschter Kurs, optionale
-                Nachricht.
+                WhatsApp-Nummer, gewünschte Kursart (Gruppen- oder
+                Privatstunde) sowie zwei Wunschtermine (Datum und Uhrzeit).
               </p>
               <ul className="mt-2 list-inside list-disc space-y-1">
                 <li>
@@ -252,10 +253,10 @@ export default function DatenschutzPage() {
           <p className="mt-4">
             Zur Ausübung Ihrer Rechte genügt eine formlose E-Mail an{" "}
             <a
-              href="mailto:privacy@bachatavienna.com"
+              href={`mailto:${PUBLIC_CONTACT_EMAIL}`}
               className="text-primary hover:underline"
             >
-              privacy@bachatavienna.com
+              {PUBLIC_CONTACT_EMAIL}
             </a>
             .
           </p>

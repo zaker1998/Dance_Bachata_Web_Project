@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { bachataVideos } from "@/lib/data";
-import { VideoCard } from "@/components/videos/video-card";
+import { VideoLibrary } from "@/components/videos/video-library";
 
 export const metadata: Metadata = {
-  title: "Video Library — Bachata Vienna",
+  title: "Video Library",
   description: "Browse our Bachata class recordings across all levels.",
   alternates: { canonical: "/videos" },
   openGraph: {
@@ -26,11 +26,7 @@ export default function VideosPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {bachataVideos.map((video) => (
-          <VideoCard key={video.id} video={video} />
-        ))}
-      </div>
+      <VideoLibrary videos={bachataVideos} />
     </div>
   );
 }

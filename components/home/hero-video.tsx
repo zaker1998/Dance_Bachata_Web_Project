@@ -92,7 +92,7 @@ export function HeroVideo({ videoId, startSec, endSec }: HeroVideoProps) {
   }, [videoId, startSec, endSec, prefersReducedMotion]);
 
   return (
-    <>
+    <div aria-hidden="true">
       <div
         className={`pointer-events-none absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
           playing ? "opacity-0" : "opacity-100"
@@ -106,6 +106,6 @@ export function HeroVideo({ videoId, startSec, endSec }: HeroVideoProps) {
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div id="yt-bg-player" />
       </div>
-    </>
+    </div>
   );
 }

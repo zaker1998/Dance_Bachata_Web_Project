@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
 
 interface FadeUpProps extends ComponentProps<typeof motion.div> {
@@ -23,9 +23,10 @@ export function FadeUp({
   ...rest
 }: FadeUpProps) {
   const Comp = motion[as] as typeof motion.div;
+  const prefersReducedMotion = useReducedMotion();
   return (
     <Comp
-      initial={{ opacity: 0, y: 20 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once }}
       transition={{ duration: 0.5, delay }}

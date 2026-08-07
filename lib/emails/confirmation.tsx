@@ -34,7 +34,7 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking Confirmed — Bachata Vienna</title>
+  <title>Booking Request Received — Bachata Vienna</title>
 </head>
 <body style="margin:0;padding:0;background:#faf9f6;font-family:Inter,ui-sans-serif,system-ui,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f6;padding:40px 16px;">
@@ -55,10 +55,10 @@ export function confirmationEmailHtml(booking: BookingInsert): string {
           <tr>
             <td style="padding:36px 40px;">
               <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1a1a1a;">
-                You&apos;re booked! 🎉
+                Booking request received 🎉
               </h1>
               <p style="margin:0 0 28px;font-size:15px;color:#737373;">
-                Hi ${safeName}, your booking request has been received. We&apos;ll confirm your spot shortly.
+                Hi ${safeName}, thanks for your request &#8212; we&#39;ll get back to you shortly to confirm your spot.
               </p>
 
               <!-- Booking details box -->

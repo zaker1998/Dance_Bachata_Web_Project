@@ -108,7 +108,11 @@ function BookingFormInner({ onReset }: { onReset: () => void }) {
     );
   }
 
-  const todayIso = new Date().toISOString().split("T")[0];
+  // Vienna-local "today" for the date pickers' min — toISOString() is UTC and
+  // would allow "yesterday" in the early Vienna morning.
+  const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Vienna" }).format(
+    new Date()
+  );
 
   return (
     <form action={formAction} className="space-y-5" noValidate>

@@ -25,11 +25,10 @@ export interface BookingResult {
   >;
 }
 
-const today = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
+// Today's date in Vienna as "YYYY-MM-DD" — the server may run in UTC,
+// so comparing against server-local midnight would be off by up to 2 hours.
+const todayInVienna = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Vienna" }).format(new Date());
 
 const VALID_TIMES = Array.from({ length: 15 }, (_, i) =>
   String(i + 8).padStart(2, "0") + ":00"
@@ -39,10 +38,8 @@ const dateField = (label: string) =>
   z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, `Please pick a valid ${label}.`)
-    .refine((s) => {
-      const d = new Date(s + "T00:00:00");
-      return !Number.isNaN(d.getTime()) && d >= today();
-    }, "Date must be today or later.");
+    .refine((s) => !Number.isNaN(new Date(s + "T00:00:00").getTime()), `Please pick a valid ${label}.`)
+    .refine((s) => s >= todayInVienna(), "Date must be today or later.");
 
 const timeField = z.enum(VALID_TIMES, { message: "Please pick a valid time." });
 
@@ -70,8 +67,6 @@ const BookingSchema = z
     preferred_time: timeField,
     secondary_date: dateField("date"),
     secondary_time: timeField,
-    // Honeypot — must stay empty
-    website: z.string().max(0).optional().or(z.literal("")),
   })
   .refine(
     (d) => !(d.preferred_date === d.secondary_date && d.preferred_time === d.secondary_time),
@@ -92,6 +87,12 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
     };
   }
 
+  // Honeypot — checked before validation so bots get a plausible success
+  // response instead of a validation error revealing the trap.
+  if (formData.get("website")) {
+    return { success: true, message: "Booking submitted! We'll confirm your spot shortly." };
+  }
+
   const parsed = BookingSchema.safeParse({
     user_name: formData.get("user_name"),
     user_email: formData.get("user_email"),
@@ -101,7 +102,6 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
     preferred_time: formData.get("preferred_time"),
     secondary_date: formData.get("secondary_date"),
     secondary_time: formData.get("secondary_time"),
-    website: formData.get("website") ?? "",
   });
 
   if (!parsed.success) {
@@ -126,11 +126,6 @@ export async function createBooking(formData: FormData): Promise<BookingResult> 
       message: "Please fix the highlighted fields.",
       fieldErrors,
     };
-  }
-
-  // Silently accept if honeypot is tripped — don't tell the bot anything useful.
-  if (parsed.data.website) {
-    return { success: true, message: "Booking submitted! We'll confirm your spot shortly." };
   }
 
   const booking: BookingInsert = {

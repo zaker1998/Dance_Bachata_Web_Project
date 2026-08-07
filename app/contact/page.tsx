@@ -12,7 +12,7 @@ import {
 } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Contact — Bachata Vienna",
+  title: "Contact",
   description:
     "Get in touch about Bachata classes, private lessons, or events in Vienna.",
   alternates: { canonical: "/contact" },

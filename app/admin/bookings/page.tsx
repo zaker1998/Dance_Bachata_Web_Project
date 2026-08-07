@@ -38,8 +38,8 @@ export default async function AdminBookingsPage() {
           No bookings yet.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3">Name</th>

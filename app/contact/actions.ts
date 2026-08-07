@@ -20,7 +20,6 @@ const ContactSchema = z.object({
     .trim()
     .min(10, "Please write at least 10 characters.")
     .max(4000, "Message is too long."),
-  website: z.string().max(0).optional().or(z.literal("")),
 });
 
 const contactRateLimiter = createRateLimiter({
@@ -38,11 +37,16 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
     };
   }
 
+  // Honeypot — checked before validation so bots get a plausible success
+  // response instead of a validation error revealing the trap.
+  if (formData.get("website")) {
+    return { success: true, message: "Thanks — your message has been sent." };
+  }
+
   const parsed = ContactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
     message: formData.get("message"),
-    website: formData.get("website") ?? "",
   });
 
   if (!parsed.success) {
@@ -58,11 +62,6 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
       message: "Please fix the highlighted fields.",
       fieldErrors,
     };
-  }
-
-  if (parsed.data.website) {
-    // Honeypot tripped — silently succeed.
-    return { success: true, message: "Thanks — your message has been sent." };
   }
 
   let env: ReturnType<typeof getServerEnv>;

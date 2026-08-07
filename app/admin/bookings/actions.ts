@@ -2,6 +2,7 @@
 
 import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { verifyAdminRequest } from "@/lib/admin-auth";
 import { sendBookingConfirmedEmail } from "@/lib/email";
 import type { BookingRow } from "@/lib/types";
 import { revalidatePath } from "next/cache";
@@ -13,6 +14,10 @@ const UpdateBookingStatusSchema = z.object({
 });
 
 export async function updateBookingStatus(id: string, status: BookingRow["status"]) {
+  if (!(await verifyAdminRequest())) {
+    throw new Error("Unauthorized.");
+  }
+
   const parsed = UpdateBookingStatusSchema.safeParse({ id, status });
   if (!parsed.success) {
     throw new Error("Invalid booking status update.");

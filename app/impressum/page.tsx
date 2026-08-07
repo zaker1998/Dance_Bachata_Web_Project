@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Impressum — Bachata Vienna",
+  title: "Impressum",
   description:
     "Legal information (Impressum) for Bachata Vienna according to §5 ECG, §25 MedienG and §14 UGB.",
   alternates: { canonical: "/impressum" },

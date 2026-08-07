@@ -3,7 +3,7 @@ import { BookingForm } from "@/components/booking/booking-form";
 import { Users, User } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Book a Class — Bachata Vienna",
+  title: "Book a Class",
   description:
     "Reserve your spot in a group class or book a private Bachata lesson in Vienna.",
   alternates: { canonical: "/book" },

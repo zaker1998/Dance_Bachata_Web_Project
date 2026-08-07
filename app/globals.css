@@ -12,7 +12,7 @@
   --color-accent: #e91e63;
   --color-border: #e5e5e5;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 html {
