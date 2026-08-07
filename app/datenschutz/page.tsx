@@ -148,6 +148,31 @@ export default function DatenschutzPage() {
                 eingesetzt.
               </p>
             </div>
+
+            <div>
+              <h3 className="mb-2 font-semibold">e) YouTube-Videos</h3>
+              <p>
+                Auf dieser Website sind Videos von YouTube (Google Ireland
+                Limited) im erweiterten Datenschutzmodus
+                (&bdquo;youtube-nocookie.com&ldquo;) eingebunden. Beim Laden
+                bzw. Abspielen eines Videos werden Daten (z.&nbsp;B. Ihre
+                IP-Adresse) an Google übertragen; im erweiterten
+                Datenschutzmodus werden dabei keine Cookies zur
+                Personalisierung gesetzt. Rechtsgrundlage ist unser
+                berechtigtes Interesse an einer ansprechenden Darstellung
+                unseres Angebots (Art 6 Abs 1 lit f DSGVO). Weitere
+                Informationen finden Sie in der{" "}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Datenschutzerklärung von Google
+                </a>
+                .
+              </p>
+            </div>
           </div>
         </section>
 

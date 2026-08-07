@@ -71,6 +71,7 @@ const localBusinessJsonLd = {
   name: SITE_NAME,
   description: `Bachata dance classes and private lessons in ${CITY}, ${COUNTRY}.`,
   url: siteUrl,
+  image: `${siteUrl}/opengraph-image.png`,
   email: PUBLIC_CONTACT_EMAIL,
   address: {
     "@type": "PostalAddress",

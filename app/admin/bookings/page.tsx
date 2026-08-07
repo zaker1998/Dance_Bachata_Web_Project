@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { cn } from "@/lib/utils";
 import { StatusSelect } from "./status-select";
 import type { BookingRow } from "@/lib/types";
 
@@ -19,8 +21,29 @@ async function getBookings(): Promise<BookingRow[]> {
   return data ?? [];
 }
 
-export default async function AdminBookingsPage() {
-  const bookings = await getBookings();
+const STATUS_FILTERS = ["all", "pending", "confirmed", "cancelled"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
+const filterStyles: Record<StatusFilter, string> = {
+  all: "border-primary bg-primary text-white",
+  pending: "border-amber-300 bg-amber-100 text-amber-800",
+  confirmed: "border-emerald-300 bg-emerald-100 text-emerald-800",
+  cancelled: "border-rose-300 bg-rose-100 text-rose-800",
+};
+
+export default async function AdminBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const allBookings = await getBookings();
+
+  const { status } = await searchParams;
+  const filter: StatusFilter = STATUS_FILTERS.includes(status as StatusFilter)
+    ? (status as StatusFilter)
+    : "all";
+  const bookings =
+    filter === "all" ? allBookings : allBookings.filter((b) => b.status === filter);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -28,14 +51,39 @@ export default async function AdminBookingsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {bookings.length} total · change status inline
+            {allBookings.length} total · change status inline
           </p>
         </div>
       </div>
 
+      <div className="mb-6 flex flex-wrap gap-2">
+        {STATUS_FILTERS.map((f) => {
+          const count =
+            f === "all"
+              ? allBookings.length
+              : allBookings.filter((b) => b.status === f).length;
+          const active = filter === f;
+          return (
+            <Link
+              key={f}
+              href={f === "all" ? "/admin/bookings" : `/admin/bookings?status=${f}`}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "rounded-full border px-4 py-1.5 text-sm font-medium capitalize transition-colors",
+                active
+                  ? filterStyles[f]
+                  : "border-border bg-white text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              )}
+            >
+              {f} <span className="opacity-70">{count}</span>
+            </Link>
+          );
+        })}
+      </div>
+
       {bookings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-16 text-center text-muted-foreground">
-          No bookings yet.
+          {filter === "all" ? "No bookings yet." : `No ${filter} bookings.`}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">

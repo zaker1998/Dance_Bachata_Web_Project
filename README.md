@@ -18,7 +18,6 @@ Create `.env.local` at the project root:
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...   # server-only — never expose
 
 # Admin (HTTP Basic Auth for /admin/*)

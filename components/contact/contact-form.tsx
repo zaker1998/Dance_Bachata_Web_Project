@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { sendContactMessage, type ContactResult } from "@/app/contact/actions";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,13 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 }
 
 export function ContactForm() {
+  // Remounting via `key` resets useActionState + native fields after success.
+  const [formKey, setFormKey] = useState(0);
+
+  return <ContactFormInner key={formKey} onReset={() => setFormKey((k) => k + 1)} />;
+}
+
+function ContactFormInner({ onReset }: { onReset: () => void }) {
   const [state, formAction, pending] = useActionState(
     async (_prev: ContactResult, formData: FormData) => sendContactMessage(formData),
     initialState
@@ -41,6 +48,13 @@ export function ContactForm() {
         <p className="text-sm text-emerald-700">
           I usually respond within 24 hours.
         </p>
+        <button
+          type="button"
+          onClick={onReset}
+          className="text-sm font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900"
+        >
+          Send another message
+        </button>
       </div>
     );
   }
