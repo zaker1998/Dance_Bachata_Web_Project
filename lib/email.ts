@@ -9,9 +9,11 @@ import {
   notificationEmailText,
 } from "@/lib/emails/notification";
 import {
-  statusConfirmedEmailHtml,
-  statusConfirmedEmailText,
-} from "@/lib/emails/status-confirmed";
+  statusUpdateEmailHtml,
+  statusUpdateEmailText,
+  statusUpdateSubject,
+  type StatusEmailKind,
+} from "@/lib/emails/status-update";
 import { getServerEnv } from "@/lib/env";
 
 function logResendResult(
@@ -53,19 +55,22 @@ export async function sendBookingEmails(booking: BookingInsert) {
   logResendResult("notification email", notification);
 }
 
-export async function sendBookingConfirmedEmail(booking: BookingRow) {
+export async function sendStatusUpdateEmail(
+  booking: BookingRow,
+  status: StatusEmailKind
+) {
   const env = getServerEnv();
   const resend = new Resend(env.RESEND_API_KEY);
 
   const result = await resend.emails.send({
     from: env.RESEND_FROM_EMAIL,
     to: booking.user_email,
-    subject: "Your Bachata Vienna booking is confirmed 🎉",
-    html: statusConfirmedEmailHtml(booking),
-    text: statusConfirmedEmailText(booking),
+    subject: statusUpdateSubject(status),
+    html: statusUpdateEmailHtml(booking, status),
+    text: statusUpdateEmailText(booking, status),
   });
 
   if (result.error) {
-    console.error("Failed to send status-confirmed email:", result.error);
+    console.error(`Failed to send status-${status} email:`, result.error);
   }
 }

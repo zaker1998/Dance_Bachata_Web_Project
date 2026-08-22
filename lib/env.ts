@@ -1,26 +1,30 @@
 import { z } from "zod";
 
+// Empty string (e.g. a blank Vercel "sensitive" var) must not win over the
+// default — Zod only applies `.default()` when the value is `undefined`, so a
+// blank var would fail `.min(1)` and take the whole app down at boot.
+const blankAsUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), schema);
+
 const serverSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   ADMIN_PASSWORD: z.string().min(8, "ADMIN_PASSWORD must be at least 8 characters"),
-  ADMIN_USERNAME: z.string().min(1).default("admin"),
+  ADMIN_USERNAME: blankAsUndefined(z.string().min(1).default("admin")),
   RESEND_API_KEY: z.string().min(1),
-  // Empty string (e.g. a blank Vercel "sensitive" var) must not win over the
-  // default — Zod only applies `.default()` when the value is `undefined`.
-  RESEND_FROM_EMAIL: z.preprocess(
-    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  RESEND_FROM_EMAIL: blankAsUndefined(
     z.string().min(1).default("Bachata Vienna <onboarding@resend.dev>")
   ),
-  INSTRUCTOR_EMAIL: z.string().email().default("hello@bachatavienna.at"),
-  CONTACT_EMAIL: z.preprocess(
-    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
-    z.string().email().optional()
+  INSTRUCTOR_EMAIL: blankAsUndefined(
+    z.string().email().default("hello@bachatavienna.at")
   ),
-  NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
+  CONTACT_EMAIL: blankAsUndefined(z.string().email().optional()),
+  NEXT_PUBLIC_SITE_URL: blankAsUndefined(
+    z.string().url().default("http://localhost:3000")
+  ),
 });
 
-type ServerEnv = z.infer<typeof serverSchema>;
+export type ServerEnv = z.infer<typeof serverSchema>;
 
 let cached: ServerEnv | null = null;
 
@@ -37,4 +41,9 @@ export function getServerEnv(): ServerEnv {
 
   cached = parsed.data;
   return cached;
+}
+
+/** Test-only: drop the memoized env so a new `process.env` is re-read. */
+export function resetServerEnvCache() {
+  cached = null;
 }

@@ -1,26 +1,29 @@
 "use server";
 
 import { Resend } from "resend";
-import { z } from "zod";
 import { getServerEnv } from "@/lib/env";
-import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+import {
+  createRateLimiter,
+  getClientIp,
+  retryAfterMinutes,
+} from "@/lib/rate-limit";
+import {
+  CONTACT_FIELDS,
+  ContactSchema,
+  collectFieldErrors,
+  type ContactField,
+} from "@/lib/validation";
 import { escapeHtml } from "@/lib/utils";
 
 export interface ContactResult {
   success: boolean;
   message: string;
-  fieldErrors?: Partial<Record<"name" | "email" | "message", string>>;
+  fieldErrors?: Partial<Record<ContactField, string>>;
 }
 
-const ContactSchema = z.object({
-  name: z.string().trim().min(2, "Please enter your name.").max(80),
-  email: z.string().trim().toLowerCase().email("Please enter a valid email.").max(120),
-  message: z
-    .string()
-    .trim()
-    .min(10, "Please write at least 10 characters.")
-    .max(4000, "Message is too long."),
-});
+const SUCCESS_MESSAGE = "Thanks — your message has been sent.";
+const SEND_FAILED_MESSAGE =
+  "Couldn't send your message right now. Please try again shortly.";
 
 const contactRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
@@ -29,18 +32,19 @@ const contactRateLimiter = createRateLimiter({
 
 export async function sendContactMessage(formData: FormData): Promise<ContactResult> {
   const ip = await getClientIp();
-
-  if (!contactRateLimiter.check(`contact:${ip}`)) {
+  const limit = contactRateLimiter.consume(`contact:${ip}`);
+  if (!limit.allowed) {
+    const mins = retryAfterMinutes(limit.retryAfterMs);
     return {
       success: false,
-      message: "Too many messages. Please try again later.",
+      message: `Too many messages. Please try again in ${mins} minute${mins === 1 ? "" : "s"}.`,
     };
   }
 
   // Honeypot — checked before validation so bots get a plausible success
   // response instead of a validation error revealing the trap.
   if (formData.get("website")) {
-    return { success: true, message: "Thanks — your message has been sent." };
+    return { success: true, message: SUCCESS_MESSAGE };
   }
 
   const parsed = ContactSchema.safeParse({
@@ -50,17 +54,10 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
   });
 
   if (!parsed.success) {
-    const fieldErrors: ContactResult["fieldErrors"] = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
-      if (field === "name" || field === "email" || field === "message") {
-        fieldErrors[field] ??= issue.message;
-      }
-    }
     return {
       success: false,
       message: "Please fix the highlighted fields.",
-      fieldErrors,
+      fieldErrors: collectFieldErrors(parsed.error.issues, CONTACT_FIELDS),
     };
   }
 
@@ -91,18 +88,12 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
     });
     if (error) {
       console.error("Contact email send failed:", error);
-      return {
-        success: false,
-        message: "Couldn't send your message right now. Please try again shortly.",
-      };
+      return { success: false, message: SEND_FAILED_MESSAGE };
     }
   } catch (err) {
     console.error("Contact email send failed:", err);
-    return {
-      success: false,
-      message: "Couldn't send your message right now. Please try again shortly.",
-    };
+    return { success: false, message: SEND_FAILED_MESSAGE };
   }
 
-  return { success: true, message: "Thanks — your message has been sent." };
+  return { success: true, message: SUCCESS_MESSAGE };
 }

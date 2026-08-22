@@ -19,7 +19,52 @@ function formatSlot(date: string | null, time: string | null): string {
   return time ? `${day}, ${time}` : day;
 }
 
-export function statusConfirmedEmailHtml(booking: BookingRow): string {
+export type StatusEmailKind = "confirmed" | "cancelled";
+
+const copy: Record<
+  StatusEmailKind,
+  {
+    subject: string;
+    headline: string;
+    body: string;
+    badgeBg: string;
+    badgeFg: string;
+    label: string;
+    ctaHref: string;
+    ctaLabel: string;
+  }
+> = {
+  confirmed: {
+    subject: "Your Bachata Vienna booking is confirmed 🎉",
+    headline: "You&apos;re confirmed! 🎉",
+    body: "your class is confirmed. We'll be in touch on WhatsApp to finalize the exact time.",
+    badgeBg: "#d1fae5",
+    badgeFg: "#065f46",
+    label: "Confirmed",
+    ctaHref: `${siteUrl}/videos`,
+    ctaLabel: "Browse Class Videos",
+  },
+  cancelled: {
+    subject: "Your Bachata Vienna booking was cancelled",
+    headline: "Booking cancelled",
+    body: "your booking request has been cancelled. If this was unexpected, just reply to this email and we'll help you find another slot.",
+    badgeBg: "#ffe4e6",
+    badgeFg: "#9f1239",
+    label: "Cancelled",
+    ctaHref: `${siteUrl}/book`,
+    ctaLabel: "Book Another Class",
+  },
+};
+
+export function statusUpdateSubject(status: StatusEmailKind): string {
+  return copy[status].subject;
+}
+
+export function statusUpdateEmailHtml(
+  booking: BookingRow,
+  status: StatusEmailKind
+): string {
+  const c = copy[status];
   const safeName = escapeHtml(booking.user_name);
   const safeClassType = escapeHtml(booking.class_type);
   const safeSlot1 = escapeHtml(
@@ -34,7 +79,7 @@ export function statusConfirmedEmailHtml(booking: BookingRow): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking Confirmed — Bachata Vienna</title>
+  <title>${c.label} — Bachata Vienna</title>
 </head>
 <body style="margin:0;padding:0;background:#faf9f6;font-family:Inter,ui-sans-serif,system-ui,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f6;padding:40px 16px;">
@@ -51,10 +96,10 @@ export function statusConfirmedEmailHtml(booking: BookingRow): string {
           <tr>
             <td style="padding:36px 40px;">
               <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1a1a1a;">
-                You&apos;re confirmed! 🎉
+                ${c.headline}
               </h1>
-              <p style="margin:0 0 28px;font-size:15px;color:#737373;">
-                Hi ${safeName}, your ${safeClassType} class is confirmed. We&apos;ll be in touch on WhatsApp to finalize the exact time.
+              <p style="margin:0 0 28px;font-size:15px;color:#737373;line-height:1.6;">
+                Hi ${safeName}, ${escapeHtml(c.body)}
               </p>
               <table width="100%" cellpadding="0" cellspacing="0"
                 style="background:#faf9f6;border-radius:10px;border:1px solid #e5e5e5;margin-bottom:28px;">
@@ -76,8 +121,8 @@ export function statusConfirmedEmailHtml(booking: BookingRow): string {
                       <tr>
                         <td style="padding:6px 0;font-size:13px;color:#737373;">Status</td>
                         <td style="padding:6px 0;">
-                          <span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;">
-                            Confirmed
+                          <span style="display:inline-block;background:${c.badgeBg};color:${c.badgeFg};font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;">
+                            ${c.label}
                           </span>
                         </td>
                       </tr>
@@ -91,9 +136,9 @@ export function statusConfirmedEmailHtml(booking: BookingRow): string {
                   ${PUBLIC_CONTACT_EMAIL}
                 </a>
               </p>
-              <a href="${siteUrl}/videos"
+              <a href="${c.ctaHref}"
                 style="display:inline-block;background:#c2185b;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;text-decoration:none;">
-                Browse Class Videos
+                ${c.ctaLabel}
               </a>
             </td>
           </tr>
@@ -112,16 +157,18 @@ export function statusConfirmedEmailHtml(booking: BookingRow): string {
 </html>`;
 }
 
-export function statusConfirmedEmailText(booking: BookingRow): string {
+export function statusUpdateEmailText(
+  booking: BookingRow,
+  status: StatusEmailKind
+): string {
+  const c = copy[status];
   return `Hi ${booking.user_name},
 
-Your Bachata Vienna ${booking.class_type} class is confirmed!
+Your Bachata Vienna ${booking.class_type} class — ${c.body}
 
 1st choice: ${formatSlot(booking.preferred_date, booking.preferred_time)}
 2nd choice: ${formatSlot(booking.secondary_date, booking.secondary_time)}
-Status: Confirmed
-
-We'll be in touch on WhatsApp to finalize the exact time.
+Status: ${c.label}
 
 — Bachata Vienna
 ${PUBLIC_CONTACT_EMAIL}`;
