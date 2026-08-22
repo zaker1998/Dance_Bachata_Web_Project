@@ -38,6 +38,23 @@ Env vars are validated with Zod on boot (`lib/env.ts`), so missing/invalid value
 
 > **Production email**: until you verify a custom domain in Resend, leave `RESEND_FROM_EMAIL` at its default. Resend's shared `onboarding@resend.dev` sender can only deliver to the address that owns the Resend account, so booking confirmations to guests will silently fail. Verify your domain and set `RESEND_FROM_EMAIL` to e.g. `Bachata Vienna <noreply@yourdomain>` before launch.
 
+## Quality Checks
+
+```bash
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit (covers tests too)
+npm run test       # Vitest unit tests
+npm run verify     # all three, in order
+```
+
+Unit tests live in `test/` and cover the pure layers — request validation
+(`lib/validation.ts`), Basic-Auth parsing and constant-time comparison
+(`lib/basic-auth.ts`), the rate limiter, environment parsing, and email
+template escaping. They need no database, network, or environment setup.
+
+The same checks plus a production build run in CI on every push and pull
+request (`.github/workflows/ci.yml`).
+
 ## Tech Stack
 
 - **Next.js 15** (App Router, TypeScript, Server Actions)
